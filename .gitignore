@@ -1,1 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
 .venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data & Models (large files)
+data/
+*.pt
+*.pth
+artifacts/*.pt
+artifacts/*.pth
+
+# MLflow
+mlruns/
+mlflow.db
+mlartifacts/
+
+# Logs
+*.log
+logs/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+*.Zone.Identifier
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Temporary files
+*.tmp
+test*.jpg
+test*.png
+test*.webp
+cifar*.png
+verify_class_*.png
+
+# Docker volumes (optional - uncomment if you don't want to track these)
+# runs/
