@@ -1,137 +1,65 @@
-# 🎓 Workshop: Basic CIFAR-10 Training
+# 🎓 Basic CIFAR-10 Training
 
-**Simple PyTorch training - No MLOps yet!**
+**Simple PyTorch training - No MLOps!**
 
-This branch demonstrates a basic ML workflow **without** MLOps practices.
+This is the starting point before we add MLOps practices.
 
-## 📁 What's Here?
+## 📁 Files
 
 ```
-├── model.py       # Simple CNN definition
-├── train.py       # Basic training script
-├── predict.py     # CLI prediction tool
+├── model.py       # CNN model
+├── train.py       # Training script
+├── predict.py     # Prediction script
 └── requirements.txt
 ```
 
 ## 🚀 Quick Start
 
-### 1. Install dependencies
+### 1. Install
 
 ```bash
-pip install torch torchvision pillow
+pip install -r requirements.txt
 ```
 
-### 2. Train the model
+### 2. Train
 
 ```bash
 python train.py
 ```
 
-**Output:**
-```
-Using device: cpu
-Loading CIFAR-10 dataset...
-Train samples: 50000
-Test samples: 10000
+This will:
+- Download CIFAR-10 dataset
+- Train for 20 epochs (~10 minutes on CPU)
+- Save `best_model.pt` and `classes.txt`
 
-Starting training for 20 epochs...
-
-Epoch [1/20]
-  Batch [100/391] Loss: 1.8234 Acc: 32.45%
-  ...
-  Train Loss: 1.6543 | Train Acc: 40.23%
-  Test Loss:  1.4321 | Test Acc:  48.56%
-  ✅ Saved best model (accuracy: 48.56%)
-
-...
-
-Training completed! Best test accuracy: 72.34%
-Model saved to: best_model.pt
-Classes saved to: classes.txt
-```
-
-### 3. Make predictions
+### 3. Predict
 
 ```bash
 python predict.py cat.jpg
 ```
 
-**Output:**
+Output:
 ```
-Loading model...
-Loading image: cat.jpg
-Making prediction...
-
-========================================
 Prediction: cat
 Confidence: 78.45%
-========================================
 ```
 
-## ❌ Problems with This Approach
+## ❌ What's Wrong with This?
 
-This basic workflow has **serious limitations**:
+1. **No experiment tracking** - Can't compare runs
+2. **No versioning** - Overwrites model every time
+3. **No deployment** - Just a .pt file, no API
+4. **Not reproducible** - Works on my machine only
+5. **Everything manual** - No automation
 
-### 1. 📉 **No Experiment Tracking**
-- ❌ Can't compare different runs
-- ❌ Don't know which hyperparameters worked best
-- ❌ No way to reproduce exact results
-- ❌ Metrics are lost after terminal closes
-
-### 2. 🔄 **No Model Versioning**
-- ❌ Overwrites `best_model.pt` every time
-- ❌ Can't rollback to previous versions
-- ❌ Lost track of model history
-- ❌ No way to compare models
-
-### 3. 🚀 **No Deployment Strategy**
-- ❌ Just a `.pt` file - how to serve it?
-- ❌ No API for applications to use
-- ❌ Can't integrate with production systems
-- ❌ Manual predictions only
-
-### 4. 🔬 **No Reproducibility**
-- ❌ Different results on different machines
-- ❌ No containerization
-- ❌ Dependency conflicts
-- ❌ "Works on my machine" syndrome
-
-### 5. 🤦 **Everything is Manual**
-- ❌ Manual testing
-- ❌ Manual deployment
-- ❌ No automation
-- ❌ No CI/CD
-
-### 6. 🐛 **No Quality Assurance**
-- ❌ No automated tests
-- ❌ No validation pipeline
-- ❌ Easy to introduce bugs
-- ❌ No code quality checks
-
-## ➡️ Next Steps
-
-See how MLOps solves these problems:
-
-1. **MLflow** for experiment tracking
-2. **FastAPI** for model serving
-3. **Docker** for containerization
-4. **CI/CD** for automation
+## ➡️ See the Solution
 
 ```bash
-# Switch to the complete MLOps version
 git checkout main
 ```
 
-## 📚 What You'll Learn in Main Branch
-
-- ✅ Experiment tracking with MLflow
-- ✅ Model versioning and registry
-- ✅ REST API with FastAPI
-- ✅ Docker containerization
-- ✅ Automated testing
-- ✅ CI/CD pipeline with GitHub Actions
-- ✅ Production-ready deployment
-
----
-
-**This branch is intentionally simple to show why MLOps is necessary!**
+The `main` branch shows how to fix all these problems with:
+- ✅ MLflow for tracking
+- ✅ FastAPI for serving
+- ✅ Docker for deployment
+- ✅ CI/CD for automation
