@@ -1,167 +1,120 @@
-"""
-Simple training script for CIFAR-10.
-No MLflow, no experiment tracking, just basic training.
-"""
+"""Training script for CIFAR-10 CNN."""
+import argparse
+import os
+import random
+from typing import Dict
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-from model import SimpleCNN
 
-# CIFAR-10 classes
-CLASSES = ['airplane', 'automobile', 'bird', 'cat', 'deer', 
-           'dog', 'frog', 'horse', 'ship', 'truck']
+from data import get_dataloaders, CLASSES
+from model import SimpleCifarCNN
 
 
-def get_data_loaders(batch_size=128):
-    """Create train and test data loaders."""
-    
-    # Simple transforms - just convert to tensor
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-    ])
-    
-    # Download and load datasets
-    train_dataset = datasets.CIFAR10(
-        root='./data', 
-        train=True, 
-        download=True, 
-        transform=transform
-    )
-    
-    test_dataset = datasets.CIFAR10(
-        root='./data', 
-        train=False, 
-        download=True, 
-        transform=transform
-    )
-    
-    # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    
-    return train_loader, test_loader
+def set_seed(seed: int = 42):
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
-def train_one_epoch(model, train_loader, criterion, optimizer, device):
-    """Train for one epoch."""
+def accuracy(logits: torch.Tensor, targets: torch.Tensor) -> float:
+    preds = logits.argmax(dim=1)
+    return (preds == targets).float().mean().item()
+
+
+def train_one_epoch(model, loader, device, criterion, optimizer) -> Dict[str, float]:
     model.train()
-    running_loss = 0.0
-    correct = 0
-    total = 0
+    total_loss, total_acc, count = 0.0, 0.0, 0
     
-    for batch_idx, (inputs, targets) in enumerate(train_loader):
-        inputs, targets = inputs.to(device), targets.to(device)
-        
-        # Forward pass
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs, targets)
-        
-        # Backward pass
+    for images, targets in loader:
+        images, targets = images.to(device), targets.to(device)
+        optimizer.zero_grad(set_to_none=True)
+        logits = model(images)
+        loss = criterion(logits, targets)
         loss.backward()
         optimizer.step()
-        
-        # Statistics
-        running_loss += loss.item()
-        _, predicted = outputs.max(1)
-        total += targets.size(0)
-        correct += predicted.eq(targets).sum().item()
-        
-        # Print progress every 100 batches
-        if (batch_idx + 1) % 100 == 0:
-            print(f'  Batch [{batch_idx + 1}/{len(train_loader)}] '
-                  f'Loss: {running_loss / (batch_idx + 1):.4f} '
-                  f'Acc: {100. * correct / total:.2f}%')
-    
-    epoch_loss = running_loss / len(train_loader)
-    epoch_acc = 100. * correct / total
-    
-    return epoch_loss, epoch_acc
+        bs = targets.size(0)
+        total_loss += loss.item() * bs
+        total_acc += accuracy(logits, targets) * bs
+        count += bs
+    return {"loss": total_loss / count, "acc": total_acc / count}
 
 
-def evaluate(model, test_loader, criterion, device):
-    """Evaluate on test set."""
+def evaluate(model, loader, device, criterion) -> Dict[str, float]:
     model.eval()
-    running_loss = 0.0
-    correct = 0
-    total = 0
-    
+    total_loss, total_acc, count = 0.0, 0.0, 0
     with torch.no_grad():
-        for inputs, targets in test_loader:
-            inputs, targets = inputs.to(device), targets.to(device)
-            
-            outputs = model(inputs)
-            loss = criterion(outputs, targets)
-            
-            running_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += targets.size(0)
-            correct += predicted.eq(targets).sum().item()
-    
-    test_loss = running_loss / len(test_loader)
-    test_acc = 100. * correct / total
-    
-    return test_loss, test_acc
+        for images, targets in loader:
+            images, targets = images.to(device), targets.to(device)
+            logits = model(images)
+            loss = criterion(logits, targets)
+            bs = targets.size(0)
+            total_loss += loss.item() * bs
+            total_acc += accuracy(logits, targets) * bs
+            count += bs
+    return {"loss": total_loss / count, "acc": total_acc / count}
+
+
+def save_best(model, out_dir="artifacts", filename="best_model.pt"):
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, filename)
+    torch.save(model.state_dict(), path)
+    return path
+
+
+def parse_args():
+    p = argparse.ArgumentParser(description="Train CIFAR-10 CNN")
+    p.add_argument("--epochs", type=int, default=5)
+    p.add_argument("--batch-size", type=int, default=128)
+    p.add_argument("--lr", type=float, default=1e-3)
+    p.add_argument("--weight-decay", type=float, default=1e-4)
+    p.add_argument("--num-workers", type=int, default=2)
+    p.add_argument("--data-dir", type=str, default="./data")
+    p.add_argument("--seed", type=int, default=42)
+    return p.parse_args()
 
 
 def main():
-    """Main training loop."""
-    # Configuration
-    EPOCHS = 20
-    BATCH_SIZE = 128
-    LEARNING_RATE = 0.001
+    args = parse_args()
+    set_seed(args.seed)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     
-    # Device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'Using device: {device}')
+    pin_memory = (device.type == "cuda")
+    train_loader, val_loader = get_dataloaders(
+        data_dir=args.data_dir, batch_size=args.batch_size,
+        num_workers=args.num_workers, pin_memory=pin_memory,
+    )
     
-    # Data loaders
-    print('Loading CIFAR-10 dataset...')
-    train_loader, test_loader = get_data_loaders(BATCH_SIZE)
-    print(f'Train samples: {len(train_loader.dataset)}')
-    print(f'Test samples: {len(test_loader.dataset)}')
-    
-    # Model, loss, optimizer
-    model = SimpleCNN(num_classes=10).to(device)
+    model = SimpleCifarCNN(num_classes=len(CLASSES)).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     
-    print(f'\nStarting training for {EPOCHS} epochs...\n')
+    print(f"\nTraining for {args.epochs} epochs...")
+    print(f"lr={args.lr}, batch_size={args.batch_size}, weight_decay={args.weight_decay}\n")
     
-    best_acc = 0.0
+    best_val_acc = 0.0
+    for epoch in range(1, args.epochs + 1):
+        train_metrics = train_one_epoch(model, train_loader, device, criterion, optimizer)
+        val_metrics = evaluate(model, val_loader, device, criterion)
+        print(f"[{epoch:02d}/{args.epochs}] "
+              f"train_loss={train_metrics['loss']:.4f} train_acc={train_metrics['acc']:.4f} "
+              f"val_loss={val_metrics['loss']:.4f} val_acc={val_metrics['acc']:.4f}")
+        if val_metrics["acc"] > best_val_acc:
+            best_val_acc = val_metrics["acc"]
+            best_path = save_best(model)
+            print(f"  ✅ Saved best model (val_acc: {best_val_acc:.4f})")
     
-    # Training loop
-    for epoch in range(EPOCHS):
-        print(f'Epoch [{epoch + 1}/{EPOCHS}]')
-        
-        # Train
-        train_loss, train_acc = train_one_epoch(
-            model, train_loader, criterion, optimizer, device
-        )
-        
-        # Evaluate
-        test_loss, test_acc = evaluate(model, test_loader, criterion, device)
-        
-        print(f'  Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}%')
-        print(f'  Test Loss:  {test_loss:.4f} | Test Acc:  {test_acc:.2f}%')
-        
-        # Save best model
-        if test_acc > best_acc:
-            best_acc = test_acc
-            torch.save(model.state_dict(), 'best_model.pt')
-            # Save classes list
-            with open('classes.txt', 'w') as f:
-                f.write('\n'.join(CLASSES))
-            print(f'  ✅ Saved best model (accuracy: {best_acc:.2f}%)')
-        
-        print()
+    os.makedirs("artifacts", exist_ok=True)
+    with open("artifacts/classes.txt", "w") as f:
+        f.write("\n".join(CLASSES))
     
-    print(f'Training completed! Best test accuracy: {best_acc:.2f}%')
-    print(f'Model saved to: best_model.pt')
-    print(f'Classes saved to: classes.txt')
+    print(f"\nBest validation accuracy: {best_val_acc:.4f}")
+    print(f"Model: {best_path}, Classes: artifacts/classes.txt")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

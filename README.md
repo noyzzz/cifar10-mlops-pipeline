@@ -7,9 +7,10 @@ This is the starting point before we add MLOps practices.
 ## 📁 Files
 
 ```
+├── data.py        # Data loading
 ├── model.py       # CNN model
 ├── train.py       # Training script
-├── predict.py     # Prediction script
+├── infer.py       # Inference script
 └── requirements.txt
 ```
 
@@ -24,24 +25,26 @@ pip install -r requirements.txt
 ### 2. Train
 
 ```bash
-python train.py
+python train.py --epochs 5
 ```
 
 This will:
-- Download CIFAR-10 dataset
-- Train for 20 epochs (~10 minutes on CPU)
-- Save `best_model.pt` and `classes.txt`
+- Download CIFAR-10 dataset  
+- Train for 5 epochs with train/val split
+- Save `artifacts/best_model.pt` and `artifacts/classes.txt`
 
 ### 3. Predict
 
 ```bash
-python predict.py cat.jpg
+python infer.py --image cat.jpg --topk 3
 ```
 
 Output:
 ```
-Prediction: cat
-Confidence: 78.45%
+Top 3 Predictions:
+1. cat          78.45%
+2. dog          12.34%
+3. deer          5.67%
 ```
 
 ## ❌ What's Wrong with This?
