@@ -41,6 +41,16 @@ cifar10-mlops-pipeline/
 
 ### Option 1: Docker (Recommended for Production)
 
+#### Install Docker if you haven't 
+
+If you don't already have Docker installed, download it here:
+
+https://www.docker.com/products/docker-desktop/
+
+After installation, open the Docker Desktop application.
+
+#### Build and Start the API
+
 ```bash
 # Build and start the API
 docker compose build
