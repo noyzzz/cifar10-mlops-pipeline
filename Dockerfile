@@ -10,12 +10,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies (API only - minimal set)
-# Use CPU-only versions to reduce image size
+# Remove +cpu suffix for cross-platform compatibility (Mac ARM64 + Linux x86_64)
+# The --extra-index-url still ensures Linux gets CPU-only wheels when available
 # Pin numpy to 1.x for compatibility with PyTorch 2.0.0
 RUN pip install --no-cache-dir \
     "numpy<2" \
-    torch==2.0.0+cpu \
-    torchvision==0.15.0+cpu \
+    torch==2.0.0 \
+    torchvision==0.15.0 \
     fastapi==0.100.0 \
     uvicorn[standard]==0.23.0 \
     python-multipart==0.0.6 \
