@@ -16,6 +16,7 @@ from src.ml.model import SimpleCifarCNN
 def set_seed(seed: int = 42):
     random.seed(seed)
     torch.manual_seed(seed)
+    torch.mps.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True  # ok for demo
     torch.backends.cudnn.benchmark = False
@@ -81,7 +82,13 @@ def main():
     args = parse_args()
     set_seed(args.seed)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    
     pin_memory = (device.type == "cuda")
     train_loader, val_loader = get_dataloaders(
         data_dir=args.data_dir,
@@ -139,6 +146,7 @@ def main():
             mlflow.log_artifact(best_path, artifact_path="artifacts")
         # Optionally log as an MLflow model for easy loading later
         example = torch.randn(1, 3, 32, 32).numpy()
+        model = model.to("cpu")
         mlflow.pytorch.log_model(model, artifact_path="model", input_example=example)
 
         # Keep the best metric handy

@@ -23,7 +23,14 @@ def load_model(
     classes_path: str = "artifacts/classes.txt",
     device: Optional[torch.device] = None,
 ) -> Tuple[torch.nn.Module, List[str], torch.device]:
-    device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if device is None:
+        if torch.cuda.is_available():
+            device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            device = torch.device("mps")
+        else:
+            device = torch.device("cpu")
+    
     classes = _load_classes(classes_path)
     model = SimpleCifarCNN(num_classes=len(classes))
     state = torch.load(checkpoint_path, map_location="cpu")
