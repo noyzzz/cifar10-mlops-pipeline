@@ -1,8 +1,15 @@
-"""Training script for CIFAR-10 CNN."""
+"""Training script for CIFAR-10 CNN.
+
+TODO: Add MLflow experiment tracking
+"""
 import argparse
 import os
 import random
 from typing import Dict
+
+# TODO 1: Import MLflow
+# import mlflow
+# import mlflow.pytorch
 
 import torch
 import torch.nn as nn
@@ -74,6 +81,8 @@ def parse_args():
     p.add_argument("--num-workers", type=int, default=2)
     p.add_argument("--data-dir", type=str, default="./data")
     p.add_argument("--seed", type=int, default=42)
+    # TODO 2: Add --experiment argument for MLflow
+    # p.add_argument("--experiment", type=str, default="cifar10_cnn")
     return p.parse_args()
 
 
@@ -93,24 +102,67 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     
+    # TODO 3: Set up MLflow tracking
+    # mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    # mlflow.set_experiment(args.experiment)
+    
     print(f"\nTraining for {args.epochs} epochs...")
     print(f"lr={args.lr}, batch_size={args.batch_size}, weight_decay={args.weight_decay}\n")
     
     best_val_acc = 0.0
+    
+    # TODO 4: Start MLflow run
+    # with mlflow.start_run():
+    
+    # TODO 5: Log hyperparameters
+    # mlflow.log_params({
+    #     "model": "SimpleCifarCNN",
+    #     "epochs": args.epochs,
+    #     "batch_size": args.batch_size,
+    #     "lr": args.lr,
+    #     "weight_decay": args.weight_decay,
+    #     "num_workers": args.num_workers,
+    #     "device": str(device),
+    #     "seed": args.seed,
+    # })
+    
     for epoch in range(1, args.epochs + 1):
         train_metrics = train_one_epoch(model, train_loader, device, criterion, optimizer)
         val_metrics = evaluate(model, val_loader, device, criterion)
+        
+        # TODO 6: Log metrics to MLflow
+        # mlflow.log_metrics({
+        #     "train_loss": train_metrics["loss"],
+        #     "train_acc": train_metrics["acc"],
+        #     "val_loss": val_metrics["loss"],
+        #     "val_acc": val_metrics["acc"],
+        # }, step=epoch)
+        
         print(f"[{epoch:02d}/{args.epochs}] "
               f"train_loss={train_metrics['loss']:.4f} train_acc={train_metrics['acc']:.4f} "
               f"val_loss={val_metrics['loss']:.4f} val_acc={val_metrics['acc']:.4f}")
+        
         if val_metrics["acc"] > best_val_acc:
             best_val_acc = val_metrics["acc"]
             best_path = save_best(model)
             print(f"  ✅ Saved best model (val_acc: {best_val_acc:.4f})")
     
+    # Save classes file
     os.makedirs("artifacts", exist_ok=True)
     with open("artifacts/classes.txt", "w") as f:
         f.write("\n".join(CLASSES))
+    
+    # TODO 7: Log artifacts to MLflow
+    # if best_path:
+    #     mlflow.log_artifact(best_path, artifact_path="artifacts")
+    # mlflow.log_artifact("artifacts/classes.txt", artifact_path="artifacts")
+    # 
+    # # Log as MLflow model for easy loading
+    # example = torch.randn(1, 3, 32, 32).numpy()
+    # mlflow.pytorch.log_model(model, artifact_path="model", input_example=example)
+    # 
+    # # Log best metric
+    # mlflow.log_metric("best_val_acc", best_val_acc)
     
     print(f"\nBest validation accuracy: {best_val_acc:.4f}")
     print(f"Model: {best_path}, Classes: artifacts/classes.txt")
