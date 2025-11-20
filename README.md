@@ -28,7 +28,7 @@ Learn the basics of PyTorch training.
 git checkout 01-basic-training
 ```
 
-**What you'll do:**
+**What you'll do:**x
 - Load CIFAR-10 dataset
 - Train a simple CNN
 - Save the trained model
@@ -70,7 +70,7 @@ You're here! Now let's deploy your model.
 
 ```bash
 # Create virtual environment
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 # Install dependencies
@@ -87,6 +87,11 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 ---
 
 ### **Step 2: Run the API Locally**
+
+Get the first image from test dataset (if you don't have a test image test_image.jpg in working directory)
+```bash
+python3 scripts/extract_test_image.py
+```
 
 ```bash
 # Start the API server
