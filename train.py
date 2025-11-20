@@ -22,6 +22,7 @@ from model import SimpleCifarCNN
 def set_seed(seed: int = 42):
     random.seed(seed)
     torch.manual_seed(seed)
+    torch.mps.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -89,7 +90,14 @@ def parse_args():
 def main():
     args = parse_args()
     set_seed(args.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    
     print(f"Using device: {device}")
     
     pin_memory = (device.type == "cuda")
