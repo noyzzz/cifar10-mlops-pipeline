@@ -1,272 +1,283 @@
-# 🚀 CIFAR-10 MLOps Pipeline
+# 🎓 CIFAR-10 MLOps Workshop
 
-Complete end-to-end MLOps pipeline for CIFAR-10 image classification using PyTorch, MLflow, FastAPI, and Docker.
+Learn MLOps by building a complete machine learning pipeline from scratch!
 
 [![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)](https://www.docker.com/)
 
-## 📋 Overview
+## 🎯 What You'll Build
 
-This project demonstrates a complete MLOps workflow:
-1. **Train** a compact CNN on CIFAR-10 dataset
-2. **Track** experiments with MLflow
-3. **Serve** the model via FastAPI REST API
-4. **Containerize** with Docker for production deployment
-5. **Monitor** model performance and predictions
+A production-ready image classification API that:
+- ✅ Trains a CNN on CIFAR-10 dataset
+- ✅ Tracks experiments with MLflow
+- ✅ Serves predictions via REST API
+- ✅ Runs in Docker containers
 
-## 🏗️ Architecture
+---
 
-```
-cifar10-mlops-pipeline/
-├── src/
-│   ├── ml/
-│   │   ├── model.py      # SimpleCifarCNN architecture
-│   │   ├── data.py       # Data loaders with train/val split
-│   │   ├── train.py      # Training pipeline with MLflow
-│   │   └── infer.py      # Inference logic
-│   └── api/
-│       └── main.py       # FastAPI application
-├── artifacts/            # Trained model artifacts
-│   ├── best_model.pt     # Best model weights
-│   └── classes.txt       # Class labels
-├── tests/               # Unit tests
-├── Dockerfile           # Production API container
-├── docker-compose.yml   # Service orchestration
-└── requirements.txt     # Python dependencies
-```
+## 📚 Workshop Path
 
-## 🚀 Quick Start
+Follow these branches in order to build the complete pipeline:
 
-### Option 1: Docker (Recommended for Production)
-
-#### Install Docker if you haven't 
-
-If you don't already have Docker installed, download it here:
-
-https://www.docker.com/products/docker-desktop/
-
-After installation, open the Docker Desktop application.
-
-#### Build and Start the API
+### **Branch 1: `01-basic-training`** - Train Your First Model
+Learn the basics of PyTorch training.
 
 ```bash
-# Build and start the API
-docker compose build
-docker compose up -d
-
-# Test the API
-curl http://localhost:8000/health
-curl -X POST http://localhost:8000/predict -F "file=@image.jpg"
-
-# View API documentation
-open http://localhost:8000/docs
+git checkout 01-basic-training
 ```
 
-### Option 2: Local Development
+**What you'll do:**
+- Load CIFAR-10 dataset
+- Train a simple CNN
+- Save the trained model
+
+[📖 See Branch README](https://github.com/noyzzz/cifar10-mlops-pipeline/tree/01-basic-training)
+
+---
+
+### **Branch 2: `workshop-add-mlflow`** - Add Experiment Tracking
+Track your experiments like a pro.
+
+```bash
+git checkout workshop-add-mlflow
+```
+
+**What you'll do:**
+- Add MLflow tracking (7 easy TODOs)
+- Log hyperparameters and metrics
+- Compare multiple training runs
+- View results in MLflow UI
+
+[📖 See Branch README](https://github.com/noyzzz/cifar10-mlops-pipeline/tree/workshop-add-mlflow)
+
+---
+
+### **Branch 3: `main`** - Deploy with API & Docker
+You're here! Now let's deploy your model.
+
+**What you'll do:**
+1. Train your model with MLflow tracking
+2. Build a REST API to serve predictions
+3. Containerize everything with Docker
+
+---
+
+## 🚀 Quick Start (Local Deployment)
+
+### **Step 1: Train the Model**
 
 ```bash
 # Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Train the model
-python -m src.ml.train --epochs 20 --batch-size 128
+# Train the model (creates artifacts/best_model.pt)
+python -m src.ml.train --epochs 10
 
-# Start MLflow UI (optional)
-mlflow ui --backend-store-uri sqlite:///mlflow.db
-
-# Start API server
-uvicorn src.api.main:app --reload
-
-# Test the API
-curl http://localhost:8000/health
-```
-
-## 📊 Training
-
-### Basic Training
-```bash
-python -m src.ml.train --epochs 20 --batch-size 128
-```
-
-### Advanced Training with Custom Parameters
-```bash
-python -m src.ml.train \
-  --experiment "cifar10_experiment" \
-  --epochs 50 \
-  --batch-size 128 \
-  --lr 0.001 \
-  --weight-decay 0.0001
-```
-
-### Training Parameters
-- `--experiment`: MLflow experiment name (default: "cifar10_test")
-- `--epochs`: Number of training epochs (default: 10)
-- `--batch-size`: Training batch size (default: 64)
-- `--lr`: Learning rate (default: 0.001)
-- `--weight-decay`: L2 regularization (default: 0.0001)
-
-### Expected Performance
-- **Training time**: ~5-10 minutes (10 epochs, CPU)
-- **Validation accuracy**: 65-75% (simple CNN)
-- **Model size**: ~2.1 MB
-
-## 🔍 MLflow Tracking
-
-View experiment results and model artifacts:
-
-```bash
+# View experiments (optional)
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 # Open http://localhost:5000
 ```
 
-**Logged metrics:**
-- Training loss/accuracy per epoch
-- Validation loss/accuracy per epoch
-- Best validation accuracy
-- Model parameters (lr, batch_size, etc.)
+---
 
-## 🌐 API Endpoints
+### **Step 2: Run the API Locally**
 
-### Health Check
 ```bash
-GET /health
+# Start the API server
+uvicorn src.api.main:app --reload
+
+# Test health check
+curl http://localhost:8000/health
+
+# Test prediction (use your own image!)
+curl -X POST http://localhost:8000/predict -F "file=@test_image.jpg"
+
+# View interactive docs
+open http://localhost:8000/docs
 ```
 
-### Predict Image Class
-```bash
-POST /predict
-Content-Type: multipart/form-data
-Body: file=<image>
-```
-
-**Example:**
-```bash
-curl -X POST http://localhost:8000/predict \
-  -F "file=@cat.jpg" \
-  | python -m json.tool
-```
-
-**Response:**
+**Expected Response:**
 ```json
 {
-  "filename": "cat.jpg",
+  "filename": "test_image.jpg",
   "predictions": [
-    {"label": "cat", "prob": 0.7234},
-    {"label": "dog", "prob": 0.1523},
-    {"label": "deer", "prob": 0.0456}
+    {"label": "cat", "prob": 0.85},
+    {"label": "dog", "prob": 0.10},
+    {"label": "bird", "prob": 0.03}
   ]
 }
 ```
 
-### Interactive Documentation
-Visit `http://localhost:8000/docs` for Swagger UI with interactive API testing.
+---
 
-## 🐳 Docker Deployment
+### **Step 3: Deploy with Docker**
 
-### Build and Run
+Now let's containerize it for production!
+
+#### **Install Docker**
+If you don't have Docker: https://www.docker.com/products/docker-desktop/
+
+After installation, open the Docker Desktop application.
+
+#### **Build & Run**
+
 ```bash
-# Build the image
+# Build the Docker image
 docker compose build
 
-# Start services
+# Start the container
 docker compose up -d
 
-# Check logs
+# Check it's running
+docker compose ps
+
+# Test the containerized API
+curl http://localhost:8000/health
+curl -X POST http://localhost:8000/predict -F "file=@test_image.jpg"
+
+# View logs
 docker compose logs -f
 
-# Stop services
+# Stop when done
 docker compose down
 ```
 
-### Environment Variables
-- `MODEL_PATH`: Path to model file (default: `/app/artifacts/best_model.pt`)
-- `CLASSES_PATH`: Path to classes file (default: `/app/artifacts/classes.txt`)
+**That's it!** 🎉 Your model is now running in a production-ready container!
 
-## 📦 Model Architecture
+---
 
-**SimpleCifarCNN:**
-- 2 Convolutional layers (32, 64 filters)
-- 2 Max pooling layers
+## 📖 API Documentation
+
+### **Endpoints**
+
+#### Health Check
+```bash
+GET /health
+```
+
+#### Predict Image Class
+```bash
+POST /predict
+Content-Type: multipart/form-data
+Body: file=<image.jpg>
+```
+
+#### Interactive Docs
+Visit http://localhost:8000/docs for Swagger UI
+
+---
+
+## 🧪 Test with Sample Images
+
+Download CIFAR-10 test images:
+```bash
+# The training script already downloads data to ./data/
+# You can use any image from there, or use your own!
+
+# Example: Use a cat image
+curl -X POST http://localhost:8000/predict \
+  -F "file=@./my_cat.jpg" | python -m json.tool
+```
+
+---
+
+## � Model Info
+
+**Architecture:** SimpleCifarCNN
+- 2 Convolutional layers
+- 2 Max pooling layers  
 - 2 Fully connected layers
-- ReLU activation
 - ~543K parameters
 
-**Input:** 32×32 RGB images  
-**Output:** 10 classes (airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck)
+**Performance:**
+- Validation Accuracy: 65-75%
+- Inference Time: ~50ms (CPU)
+- Model Size: 2.1 MB
 
-## 🧪 Testing
+**Classes:** airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck
 
+---
+
+## 🛠️ Troubleshooting
+
+### **Port already in use**
 ```bash
-# Run unit tests
-pytest tests/
-
-# Test specific file
-pytest tests/test_infer.py
-
-# With coverage
-pytest --cov=src tests/
+# Change port in docker-compose.yml or use different port:
+uvicorn src.api.main:app --port 8001
 ```
 
-## 📈 Performance Benchmarks
-
-| Metric | Value |
-|--------|-------|
-| Validation Accuracy | 65-75% |
-| Inference Time (CPU) | ~50ms |
-| Model Size | 2.1 MB |
-| Docker Image Size | ~1.2 GB |
-| API Response Time | ~100ms |
-
-## 🛠️ Development
-
-### Project Structure
-```
-src/
-├── ml/
-│   ├── model.py    # Neural network architecture
-│   ├── data.py     # Dataset loading & preprocessing
-│   ├── train.py    # Training loop & MLflow logging
-│   └── infer.py    # Model loading & prediction
-└── api/
-    └── main.py     # FastAPI application
-```
-
-### Code Quality
+### **Model not found**
 ```bash
-# Format code
-black src/
-
-# Lint code
-flake8 src/
-
-# Type checking
-mypy src/
+# Make sure you trained first:
+python -m src.ml.train --epochs 10
+ls artifacts/  # Should show best_model.pt
 ```
+
+### **MLflow UI not working**
+```bash
+# Kill existing process
+pkill -9 python
+
+# Start on different port
+mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5001
+```
+
+---
+
+## 🎓 What You Learned
+
+After completing this workshop, you can:
+- ✅ Train deep learning models with PyTorch
+- ✅ Track experiments with MLflow
+- ✅ Build REST APIs with FastAPI
+- ✅ Deploy models with Docker
+- ✅ Create production-ready ML pipelines
+
+---
+
+## 📂 Project Structure
+
+```
+cifar10-mlops-workshop/
+├── src/
+│   ├── ml/
+│   │   ├── model.py      # CNN architecture
+│   │   ├── data.py       # Data loading
+│   │   ├── train.py      # Training with MLflow
+│   │   └── infer.py      # Inference logic
+│   └── api/
+│       └── main.py       # FastAPI app
+├── artifacts/            # Trained models
+├── tests/               # Unit tests
+├── Dockerfile           # Container definition
+├── docker-compose.yml   # Service orchestration
+└── requirements.txt     # Dependencies
+```
+
+---
+
+## 🚀 Next Steps
+
+Want to learn more?
+
+- **Add CI/CD**: Check `.github/workflows/ci.yml` for automated testing
+- **Improve Model**: Try different architectures, data augmentation
+- **Add Monitoring**: Log predictions, track model drift
+- **Scale Up**: Deploy to cloud (AWS, GCP, Azure)
+
+---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Found a bug or have suggestions? Open an issue or PR!
 
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- [CIFAR-10 Dataset](https://www.cs.toronto.edu/~kriz/cifar.html) by Alex Krizhevsky
-- [PyTorch](https://pytorch.org/) for deep learning framework
-- [MLflow](https://mlflow.org/) for experiment tracking
-- [FastAPI](https://fastapi.tiangolo.com/) for API framework
+---
 
 ## 📧 Contact
 
@@ -275,4 +286,4 @@ This project is licensed under the MIT License.
 
 ---
 
-⭐ If you find this project helpful, please give it a star!
+⭐ **Star this repo if you found it helpful!**
