@@ -3,6 +3,7 @@ version: '3.8'
 services:
   # CIFAR-10 Classification API
   api:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile
