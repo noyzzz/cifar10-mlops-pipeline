@@ -235,9 +235,17 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5001
 After completing this workshop, you can:
 - ✅ Train deep learning models with PyTorch
 - ✅ Track experiments with MLflow
-- ✅ Build REST APIs with FastAPI
-- ✅ Deploy models with Docker
-- ✅ Create production-ready ML pipelines
+- ✅ Understand how REST APIs work with FastAPI
+- ✅ Run ML models in Docker containers
+- ✅ Follow MLOps best practices for production deployments
+
+**Hands-on Experience:**
+- Built and trained a CNN from scratch
+- Added experiment tracking (7 TODOs completed)
+- Tested a production-ready API
+- Deployed a containerized ML service
+
+**Ready for more?** You now have a reference implementation to build your own ML projects!
 
 ---
 
