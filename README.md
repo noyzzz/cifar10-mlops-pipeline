@@ -107,9 +107,9 @@ open http://localhost:8000/docs
 {
   "filename": "test_image.jpg",
   "predictions": [
-    {"label": "cat", "prob": 0.85},
-    {"label": "dog", "prob": 0.10},
-    {"label": "bird", "prob": 0.03}
+    {"label": "airplane", "prob": 0.85},
+    {"label": "ship", "prob": 0.10},
+    {"label": "automobile", "prob": 0.03}
   ]
 }
 ```
@@ -180,9 +180,9 @@ Download CIFAR-10 test images:
 # The training script already downloads data to ./data/
 # You can use any image from there, or use your own!
 
-# Example: Use a cat image
+# Example: Use an airplane image
 curl -X POST http://localhost:8000/predict \
-  -F "file=@./my_cat.jpg" | python -m json.tool
+  -F "file=@./my_airplane.jpg" | python -m json.tool
 ```
 
 ---
