@@ -281,7 +281,11 @@ Found a bug or have suggestions? Open an issue or PR!
 
 ## 📧 Contact
 
-**Author:** Navid  
+**Authors:**
+- [@noyzzz](https://github.com/noyzzz) - Navid
+- [@meghakalia](https://github.com/meghakalia) - Megha Kalia
+- [@alejoaa](https://github.com/alejoaa) - Alejandro Aguirre
+
 **Repository:** [github.com/noyzzz/cifar10-mlops-pipeline](https://github.com/noyzzz/cifar10-mlops-pipeline)
 
 ---
