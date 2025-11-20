@@ -187,7 +187,7 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## � Model Info
+## 📊 Model Info
 
 **Architecture:** SimpleCifarCNN
 - 2 Convolutional layers
