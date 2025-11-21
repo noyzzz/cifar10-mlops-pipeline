@@ -103,6 +103,10 @@ curl http://localhost:8000/health
 # Test prediction (use your own image!)
 curl -X POST http://localhost:8000/predict -F "file=@test_image.jpg"
 
+# (Optional) Test predictions on multiple (5) images in test dataset
+curl -X POST "http://localhost:8000/predict_batch?file_path=data/cifar-10-batches-py/test_batch&subset=5"
+
+
 # View interactive docs
 open http://localhost:8000/docs
 ```
