@@ -27,7 +27,9 @@ RUN pip install --no-cache-dir \
 COPY src/__init__.py ./src/
 COPY src/ml/__init__.py ./src/ml/
 COPY src/ml/model.py ./src/ml/
+COPY src/ml/data.py ./src/ml/
 COPY src/ml/infer.py ./src/ml/
+COPY src/ml/infer_batch.py ./src/ml/
 COPY src/api/ ./src/api/
 
 # Copy model artifacts (trained models)
