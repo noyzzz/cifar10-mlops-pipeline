@@ -31,18 +31,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
+          pip install -r requirements.txt pytest
       
       - name: Run tests
         run: |
           pytest tests/ -v
 
-  build:
+  docker:
     name: Build and Test Docker
     runs-on: ubuntu-latest
     needs: test
@@ -50,6 +50,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Create dummy model artifacts
+        run: |
+          pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
+          python -c "
+          import torch
+          from src.ml.model import SimpleCifarCNN
+          import os
+          
+          # Create artifacts directory
+          os.makedirs('artifacts', exist_ok=True)
+          
+          # Create model with random weights
+          model = SimpleCifarCNN()
+          torch.save(model.state_dict(), 'artifacts/best_model.pt')
+          print('✓ Created dummy model')
+          
+          # Create classes file
+          classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+          with open('artifacts/classes.txt', 'w') as f:
+              f.write('\n'.join(classes))
+          print('✓ Created classes file')
+          "
+          ls -lh artifacts/
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -70,7 +100,7 @@ jobs:
           
       - name: Wait for API to be ready
         run: |
-          timeout 30 sh -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+          timeout 60 sh -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
       
       - name: Test API health endpoint
         run: |
